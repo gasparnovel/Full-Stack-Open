@@ -1,7 +1,18 @@
 import { useState } from 'react'
+import PropTypes from 'prop-types'
 
 const Statistics = ({ good, neutral, bad }) => {
   const total = good + neutral + bad
+  
+  if (total === 0) {
+    return (
+      <div>
+        <h2>Estadísticas</h2>
+        <p>No hay comentarios todavía</p>
+      </div>
+    )
+  }
+  
   const average = total === 0 ? 0 : (good * 1 + bad * -1) / total
   const positivePercentage = total === 0 ? 0 : (good / total) * 100
 
@@ -18,6 +29,21 @@ const Statistics = ({ good, neutral, bad }) => {
       </div>
     </div>
   )
+}
+
+Statistics.propTypes = {
+  good: PropTypes.number.isRequired,
+  neutral: PropTypes.number.isRequired,
+  bad: PropTypes.number.isRequired
+}
+
+const Button = ({ handleClick, text }) => (
+  <button onClick={handleClick}>{text}</button>
+)
+
+Button.propTypes = {
+  handleClick: PropTypes.func.isRequired,
+  text: PropTypes.string.isRequired
 }
 
 const App = () => {
