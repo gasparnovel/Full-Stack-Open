@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 const StatisticLine = ({ text, value }) => (
   <tr>
     <td>{text}</td>
-    <td>{typeof value === 'number' ? value.toFixed(1) : value}</td>
+    <td>{typeof value === 'number' ? Math.round(value) : value}</td>
   </tr>
 )
 
@@ -47,7 +47,7 @@ const Statistics = ({ good, neutral, bad }) => {
           <StatisticLine text="malos" value={bad} />
           <StatisticLine text="total" value={total} />
           <StatisticLine text="promedio" value={average} />
-          <StatisticLine text="positivos" value={positivePercentage} />
+          <StatisticLine text="positivos" value={positivePercentage + " %"} />
         </tbody>
       </table>
     </div>
