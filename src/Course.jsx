@@ -26,11 +26,19 @@ const Content = ({ parts }) => {
   )
 }
 
+const Total = ({ parts }) => {
+  const total = parts.reduce((sum, part) => sum + part.exercises, 0)
+  return (
+    <p><strong>Total of {total} exercises</strong></p>
+  )
+}
+
 const Course = ({ course }) => {
   return (
     <div>
       <Header name={course.name} />
       <Content parts={course.parts} />
+      <Total parts={course.parts} />
     </div>
   )
 }
@@ -50,6 +58,14 @@ Content.propTypes = {
     PropTypes.shape({
       id: PropTypes.number,
       name: PropTypes.string,
+      exercises: PropTypes.number
+    })
+  )
+}
+
+Total.propTypes = {
+  parts: PropTypes.arrayOf(
+    PropTypes.shape({
       exercises: PropTypes.number
     })
   )
