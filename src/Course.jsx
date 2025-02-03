@@ -27,7 +27,11 @@ const Content = ({ parts }) => {
 }
 
 const Total = ({ parts }) => {
-  const total = parts.reduce((sum, part) => sum + part.exercises, 0)
+  const total = parts.reduce((sum, part) => {
+    console.log('Current accumulator:', sum);
+    console.log('Current element:', part);
+    return sum + part.exercises;
+  }, 0);
   return (
     <p><strong>Total of {total} exercises</strong></p>
   )
