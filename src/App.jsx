@@ -18,6 +18,10 @@ const App = () => {
       .then(initialPersons => {
         setPersons(initialPersons)
       })
+      .catch(error => {
+        showNotification('Error loading phonebook data', 'error')
+        console.error('Error fetching data:', error)
+      })
   }, [])
 
   const handleSearchChange = (event) => {
@@ -56,10 +60,12 @@ const App = () => {
             ))
             setNewName('')
             setNewNumber('')
-            showNotification(`Updated ${returnedPerson.name}'s number`, 'success')
+            showNotification(
+              `Successfully updated ${returnedPerson.name}'s number`,
+              'success'
+            )
           })
           .catch(error => {
-            console.error('Error updating person:', error)
             if (error.response && error.response.status === 404) {
               showNotification(
                 `Information of ${existingPerson.name} has already been removed from server`,
@@ -68,10 +74,11 @@ const App = () => {
               setPersons(persons.filter(person => person.id !== existingPerson.id))
             } else {
               showNotification(
-                `Error updating ${existingPerson.name}'s information`,
+                `Failed to update ${existingPerson.name}'s information: ${error.response?.data?.error || 'Unknown error'}`,
                 'error'
               )
             }
+            console.error('Error updating person:', error)
           })
       }
       return
@@ -88,11 +95,17 @@ const App = () => {
         setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
-        showNotification(`Added ${returnedPerson.name}`, 'success')
+        showNotification(
+          `Successfully added ${returnedPerson.name}`,
+          'success'
+        )
       })
       .catch(error => {
+        showNotification(
+          `Failed to add ${newName}: ${error.response?.data?.error || 'Unknown error'}`,
+          'error'
+        )
         console.error('Error adding person:', error)
-        showNotification('Error adding new person', 'error')
       })
   }
 
@@ -102,43 +115,40 @@ const App = () => {
         .remove(id)
         .then(() => {
           setPersons(persons.filter(person => person.id !== id))
-          showNotification(`Successfully deleted ${name}`, 'success')
+          showNotification(
+            `Successfully deleted ${name}`,
+            'success'
+          )
         })
         .catch(error => {
-          console.error('Error deleting person:', error)
           if (error.response && error.response.status === 404) {
             showNotification(
               `Information of ${name} was already removed from server`,
               'error'
             )
-            setPersons(persons.filter(person => person.id !== id))
           } else {
             showNotification(
-              `Error deleting ${name}`,
+              `Failed to delete ${name}: ${error.response?.data?.error || 'Unknown error'}`,
               'error'
             )
           }
+          setPersons(persons.filter(person => person.id !== id))
+          console.error('Error deleting person:', error)
         })
     }
   }
 
-  const personsToShow = searchTerm
-    ? persons.filter(person => 
-        person.name.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-    : persons
+  const filteredPersons = persons.filter(person =>
+    person.name.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
   return (
     <div>
       <h2>Phonebook</h2>
       <Notification message={notification.message} type={notification.type} />
-      <Filter 
-        searchTerm={searchTerm} 
-        handleSearchChange={handleSearchChange} 
-      />
-
-      <h3>Add a new</h3>
+      <Filter searchTerm={searchTerm} handleSearchChange={handleSearchChange} />
       
+      <h3>Add a new</h3>
       <PersonForm 
         addPerson={addPerson}
         newName={newName}
@@ -146,13 +156,9 @@ const App = () => {
         handleNameChange={handleNameChange}
         handleNumberChange={handleNumberChange}
       />
-
-      <h3>Numbers</h3>
       
-      <Persons 
-        persons={personsToShow} 
-        handleDelete={handleDelete}
-      />
+      <h3>Numbers</h3>
+      <Persons persons={filteredPersons} handleDelete={handleDelete} />
     </div>
   )
 }
