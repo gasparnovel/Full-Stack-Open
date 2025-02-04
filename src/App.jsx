@@ -60,11 +60,18 @@ const App = () => {
           })
           .catch(error => {
             console.error('Error updating person:', error)
-            showNotification(
-              `Information of ${existingPerson.name} has already been removed from server`,
-              'error'
-            )
-            setPersons(persons.filter(person => person.id !== existingPerson.id))
+            if (error.response && error.response.status === 404) {
+              showNotification(
+                `Information of ${existingPerson.name} has already been removed from server`,
+                'error'
+              )
+              setPersons(persons.filter(person => person.id !== existingPerson.id))
+            } else {
+              showNotification(
+                `Error updating ${existingPerson.name}'s information`,
+                'error'
+              )
+            }
           })
       }
       return
@@ -95,15 +102,22 @@ const App = () => {
         .remove(id)
         .then(() => {
           setPersons(persons.filter(person => person.id !== id))
-          showNotification(`Deleted ${name}`, 'success')
+          showNotification(`Successfully deleted ${name}`, 'success')
         })
         .catch(error => {
           console.error('Error deleting person:', error)
-          showNotification(
-            `Information of ${name} has already been removed from server`,
-            'error'
-          )
-          setPersons(persons.filter(person => person.id !== id))
+          if (error.response && error.response.status === 404) {
+            showNotification(
+              `Information of ${name} was already removed from server`,
+              'error'
+            )
+            setPersons(persons.filter(person => person.id !== id))
+          } else {
+            showNotification(
+              `Error deleting ${name}`,
+              'error'
+            )
+          }
         })
     }
   }
