@@ -35,15 +35,31 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault()
     
-    if (persons.some(person => person.name === newName)) {
-      alert(`${newName} is already added to phonebook`)
+    const existingPerson = persons.find(person => person.name === newName)
+    
+    if (existingPerson) {
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
+        const changedPerson = { ...existingPerson, number: newNumber }
+        
+        axios.put(`http://localhost:3001/persons/${existingPerson.id}`, changedPerson)
+          .then(response => {
+            setPersons(persons.map(person => 
+              person.id !== existingPerson.id ? person : response.data
+            ))
+            setNewName('')
+            setNewNumber('')
+          })
+          .catch(error => {
+            console.error('Error updating person:', error)
+            alert(`Error updating ${newName}'s information`)
+          })
+      }
       return
     }
     
     const personObject = {
       name: newName,
-      number: newNumber,
-      id: persons.length + 1
+      number: newNumber
     }
 
     axios.post('http://localhost:3001/persons', personObject)
@@ -54,6 +70,7 @@ const App = () => {
       })
       .catch(error => {
         console.error('Error adding person:', error)
+        alert(`Error adding ${newName} to phonebook`)
       })
   }
 
