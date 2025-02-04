@@ -73,6 +73,21 @@ const App = () => {
       })
   }
 
+  const handleDelete = (id, name) => {
+    if (window.confirm(`¿Deseas eliminar a ${name}?`)) {
+      personService
+        .remove(id)
+        .then(() => {
+          setPersons(persons.filter(person => person.id !== id))
+        })
+        .catch(error => {
+          console.error('Error al eliminar la persona:', error)
+          alert(`La información de ${name} ya ha sido eliminada del servidor`)
+          setPersons(persons.filter(person => person.id !== id))
+        })
+    }
+  }
+
   const personsToShow = searchTerm
     ? persons.filter(person => 
         person.name.toLowerCase().includes(searchTerm.toLowerCase())
@@ -100,7 +115,10 @@ const App = () => {
 
       <h3>Numbers</h3>
       
-      <Persons persons={personsToShow} />
+      <Persons 
+        persons={personsToShow} 
+        handleDelete={handleDelete}
+      />
     </div>
   )
 }
