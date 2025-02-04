@@ -4,6 +4,9 @@ import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
 import personService from './services/persons'
 import Notification from './components/Notification'
+import countryService from './services/countries'
+import Country from './components/Country'
+import CountryList from './components/CountryList'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -11,6 +14,8 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [notification, setNotification] = useState({ message: null, type: null })
+  const [countries, setCountries] = useState([])
+  const [selectedCountry, setSelectedCountry] = useState(null)
 
   useEffect(() => {
     personService
@@ -22,10 +27,20 @@ const App = () => {
         showNotification('Error loading phonebook data', 'error')
         console.error('Error fetching data:', error)
       })
+
+    countryService
+      .getAll()
+      .then(initialCountries => {
+        setCountries(initialCountries)
+      })
+      .catch(error => {
+        console.error('Error fetching countries:', error)
+      })
   }, [])
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value)
+    setSelectedCountry(null)
   }
 
   const handleNameChange = (event) => {
@@ -142,6 +157,43 @@ const App = () => {
     person.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const handleShowCountry = (country) => {
+    setSelectedCountry(country)
+  }
+
+  const filteredCountries = countries.filter(country =>
+    country.name.common.toLowerCase().includes(searchTerm.toLowerCase())
+  )
+
+  const renderResults = () => {
+    if (searchTerm === '') {
+      return <p>Please enter a search term</p>
+    }
+
+    if (selectedCountry) {
+      return <Country country={selectedCountry} />
+    }
+
+    if (filteredCountries.length > 10) {
+      return <p>Too many matches, specify another filter</p>
+    }
+
+    if (filteredCountries.length === 1) {
+      return <Country country={filteredCountries[0]} />
+    }
+
+    if (filteredCountries.length === 0) {
+      return <p>No matches found</p>
+    }
+
+    return (
+      <CountryList 
+        countries={filteredCountries} 
+        handleShowCountry={handleShowCountry}
+      />
+    )
+  }
+
   return (
     <div>
       <h2>Phonebook</h2>
@@ -159,6 +211,9 @@ const App = () => {
       
       <h3>Numbers</h3>
       <Persons persons={filteredPersons} handleDelete={handleDelete} />
+
+      <h3>Countries</h3>
+      {renderResults()}
     </div>
   )
 }
