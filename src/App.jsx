@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
 import Filter from './components/Filter'
 import PersonForm from './components/PersonForm'
 import Persons from './components/Persons'
+import personService from './services/persons'
 
 const App = () => {
   const [persons, setPersons] = useState([])
@@ -11,12 +11,10 @@ const App = () => {
   const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
-    axios.get('http://localhost:3001/persons')
-      .then(response => {
-        setPersons(response.data)
-      })
-      .catch(error => {
-        console.error('Error fetching persons:', error)
+    personService
+      .getAll()
+      .then(initialPersons => {
+        setPersons(initialPersons)
       })
   }, [])
 
@@ -34,17 +32,17 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
-    
     const existingPerson = persons.find(person => person.name === newName)
     
     if (existingPerson) {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
         const changedPerson = { ...existingPerson, number: newNumber }
         
-        axios.put(`http://localhost:3001/persons/${existingPerson.id}`, changedPerson)
-          .then(response => {
+        personService
+          .update(existingPerson.id, changedPerson)
+          .then(returnedPerson => {
             setPersons(persons.map(person => 
-              person.id !== existingPerson.id ? person : response.data
+              person.id !== existingPerson.id ? person : returnedPerson
             ))
             setNewName('')
             setNewNumber('')
@@ -56,21 +54,22 @@ const App = () => {
       }
       return
     }
-    
+
     const personObject = {
       name: newName,
       number: newNumber
     }
 
-    axios.post('http://localhost:3001/persons', personObject)
-      .then(response => {
-        setPersons(persons.concat(response.data))
+    personService
+      .create(personObject)
+      .then(returnedPerson => {
+        setPersons(persons.concat(returnedPerson))
         setNewName('')
         setNewNumber('')
       })
       .catch(error => {
         console.error('Error adding person:', error)
-        alert(`Error adding ${newName} to phonebook`)
+        alert('Error adding new person')
       })
   }
 
