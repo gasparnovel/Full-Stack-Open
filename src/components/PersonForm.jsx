@@ -1,6 +1,19 @@
 import PropTypes from 'prop-types'
+import { useState } from 'react'
 
 const PersonForm = ({ addPerson, newName, newNumber, handleNameChange, handleNumberChange }) => {
+  const [isHovered, setIsHovered] = useState(false)
+
+  const buttonStyle = {
+    backgroundColor: isHovered ? '#4a90e2' : '#f9f9f9',
+    color: 'black',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    border: '1px solid #ccc',
+    borderRadius: '4px',
+    padding: '5px 10px'
+  }
+
   return (
     <form onSubmit={addPerson}>
       <div>
@@ -16,7 +29,14 @@ const PersonForm = ({ addPerson, newName, newNumber, handleNameChange, handleNum
         />
       </div>
       <div>
-        <button type="submit">add</button>
+        <button 
+          type="submit"
+          style={buttonStyle}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          add
+        </button>
       </div>
     </form>
   )
