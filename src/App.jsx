@@ -32,14 +32,16 @@ const App = () => {
 
   const addPerson = (event) => {
     event.preventDefault()
+    
+    // Check if person already exists
     const existingPerson = persons.find(person => person.name === newName)
     
     if (existingPerson) {
       if (window.confirm(`${newName} is already added to phonebook, replace the old number with a new one?`)) {
-        const changedPerson = { ...existingPerson, number: newNumber }
+        const updatedPerson = { ...existingPerson, number: newNumber }
         
         personService
-          .update(existingPerson.id, changedPerson)
+          .update(existingPerson.id, updatedPerson)
           .then(returnedPerson => {
             setPersons(persons.map(person => 
               person.id !== existingPerson.id ? person : returnedPerson
@@ -49,12 +51,16 @@ const App = () => {
           })
           .catch(error => {
             console.error('Error updating person:', error)
-            alert(`Error updating ${newName}'s information`)
+            alert(
+              `The person '${existingPerson.name}' was already deleted from server`
+            )
+            setPersons(persons.filter(person => person.id !== existingPerson.id))
           })
       }
       return
     }
 
+    // If person doesn't exist, create new
     const personObject = {
       name: newName,
       number: newNumber
